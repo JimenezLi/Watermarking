@@ -42,14 +42,15 @@ def E_BLIND(file_name, message, watermark=default_watermark, image_shape=default
     img = cv2.imread(os.path.join(input_path, file_name), cv2.IMREAD_GRAYSCALE)
     if img is None:
         raise FileNotFoundError
-    encoded_img = img[0:image_shape[0], 0:image_shape[1]]
-    assert encoded_img.shape == image_shape == watermark.shape
+    cut_img = img[0:image_shape[0], 0:image_shape[1]]
+    assert cut_img.shape == image_shape == watermark.shape
 
     if message == 1:
-        encoded_img = encoded_img + alpha * watermark
+        encoded_img = cut_img + alpha * watermark
     elif message == 0:
-        encoded_img = encoded_img - alpha * watermark
+        encoded_img = cut_img - alpha * watermark
     else:
+        encoded_img = cut_img
         message = NO_WATERMARK
     notes = str() if notes is None else (str(notes) + '_')
 
@@ -78,9 +79,9 @@ def D_LC(file_name, watermark=default_watermark, image_shape=default_image_shape
     if mode == 'zlc':
         return zlc
     elif mode == 'accept':
-        if mode > threshold:
+        if zlc > threshold:
             return 1
-        elif mode < -threshold:
+        elif zlc < -threshold:
             return 0
         else:
             return NO_WATERMARK
@@ -101,10 +102,13 @@ if __name__ == '__main__':
     E_BLIND('more_data_0.jpg', 1)
     E_BLIND('more_data_0.jpg', NO_WATERMARK)
 
-    threshold = 20
-    print('Blackwhite pixel rate of more_data_0.jpg:', get_blackwhite_pixel_rate('more_data_0.jpg', threshold))
-    print('Blackwhite pixel rate of brain1.bmp:', get_blackwhite_pixel_rate('brain1.bmp', threshold, image_shape=(256, 256)))
+    print('Blackwhite pixel rate of more_data_0.jpg:', get_blackwhite_pixel_rate('more_data_0.jpg', threshold=20))
+    print('Blackwhite pixel rate of brain1.bmp:', get_blackwhite_pixel_rate('brain1.bmp', threshold=20, image_shape=(256, 256)))
 
     print('Encoding 1:', D_LC('1_more_data_0.jpg', mode='zlc'))
     print('Encoding 0:', D_LC('0_more_data_0.jpg', mode='zlc'))
     print('No watermark:', D_LC('-1_more_data_0.jpg', mode='zlc'))
+
+    print('Encoding 1 Message:', D_LC('1_more_data_0.jpg', mode='accept', threshold=0.22))
+    print('Encoding 0 Message:', D_LC('0_more_data_0.jpg', mode='accept', threshold=0.22))
+    print('No watermark Message:', D_LC('-1_more_data_0.jpg', mode='accept', threshold=0.22))
