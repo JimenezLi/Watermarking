@@ -5,7 +5,8 @@ import numpy as np
 cache_path = '../cache/0'
 data_path = '../data'
 default_seed = 20230324
-image_shape = (512, 512)
+default_threshold = 0.7
+default_image_shape = (512, 512)
 NO_WATERMARK = -1
 
 
@@ -16,7 +17,7 @@ if not os.path.exists(cache_path):
     os.makedirs(cache_path)
 
 
-def generate_normalized_watermark(seed=None, image_shape=image_shape):
+def generate_normalized_watermark(seed=None, image_shape=default_image_shape):
     """
     :return: A watermark of zero mean and unit variance.
     """
@@ -27,7 +28,6 @@ def generate_normalized_watermark(seed=None, image_shape=image_shape):
 
 
 default_watermark = generate_normalized_watermark(default_seed)
-default_image_shape = image_shape
 
 
 def E_BLIND(file_name, message, watermark=default_watermark, image_shape=default_image_shape, alpha=1, notes=None,
@@ -57,16 +57,18 @@ def E_BLIND(file_name, message, watermark=default_watermark, image_shape=default
     # Output
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    cv2.imwrite(os.path.join(output_path, f'{message}_{notes}{file_name}'), encoded_img)
+    output_image_name = f'{message}_{notes}{file_name}'
+    cv2.imwrite(os.path.join(output_path, output_image_name), encoded_img)
+    return output_image_name
 
 
-def D_LC(file_name, watermark=default_watermark, image_shape=default_image_shape, mode='accept', threshold=None,
-         input_path=cache_path):
+def D_LC(file_name, watermark=default_watermark, image_shape=default_image_shape, mode='accept',
+         threshold=default_threshold, input_path=cache_path):
     """
     :param file_name: The file name in data_path; for example, 'more_data_0.jpg'
     :param mode: Chosen from 'zlc' and 'accept'; zlc mode returns the linear correlation value,
      and accept mode returns the decoded message.
-    :param threshold: The message detection value; must be given a value in accept mode.
+    :param threshold: The message detection value; used in accept mode.
     :return: See mode in params.
     """
     assert mode in ['zlc', 'accept']
@@ -98,17 +100,17 @@ def get_blackwhite_pixel_rate(img_name, threshold, image_shape=default_image_sha
 
 
 if __name__ == '__main__':
-    E_BLIND('more_data_0.jpg', 0)
-    E_BLIND('more_data_0.jpg', 1)
-    E_BLIND('more_data_0.jpg', NO_WATERMARK)
+    E_BLIND('boat.png', 0)
+    E_BLIND('boat.png', 1)
+    E_BLIND('boat.png', NO_WATERMARK)
 
-    print('Blackwhite pixel rate of more_data_0.jpg:', get_blackwhite_pixel_rate('more_data_0.jpg', threshold=20))
+    print('Blackwhite pixel rate of boat.png:', get_blackwhite_pixel_rate('boat.png', threshold=20))
     print('Blackwhite pixel rate of brain1.bmp:', get_blackwhite_pixel_rate('brain1.bmp', threshold=20, image_shape=(256, 256)))
 
-    print('Encoding 1:', D_LC('1_more_data_0.jpg', mode='zlc'))
-    print('Encoding 0:', D_LC('0_more_data_0.jpg', mode='zlc'))
-    print('No watermark:', D_LC('-1_more_data_0.jpg', mode='zlc'))
+    print('Encoding 1:', D_LC('1_boat.png', mode='zlc'))
+    print('Encoding 0:', D_LC('0_boat.png', mode='zlc'))
+    print('No watermark:', D_LC('-1_boat.png', mode='zlc'))
 
-    print('Encoding 1 Message:', D_LC('1_more_data_0.jpg', mode='accept', threshold=0.22))
-    print('Encoding 0 Message:', D_LC('0_more_data_0.jpg', mode='accept', threshold=0.22))
-    print('No watermark Message:', D_LC('-1_more_data_0.jpg', mode='accept', threshold=0.22))
+    print('Encoding 1 Message:', D_LC('1_boat.png', mode='accept', threshold=0.22))
+    print('Encoding 0 Message:', D_LC('0_boat.png', mode='accept', threshold=0.22))
+    print('No watermark Message:', D_LC('-1_boat.png', mode='accept', threshold=0.22))

@@ -8,20 +8,21 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
     # Create Image List
+    test_data_path = 'E:/Datasets/vinbigdata/train'
     image_list_length = 200
-    image_list = list(filter(lambda x: x.endswith('.jpg'), os.listdir('../data')))[:image_list_length]
+    image_list = list(filter(lambda x: x.endswith('.png'), os.listdir(test_data_path)))[:image_list_length]
 
     # Encode
     test_cache_path = '../cache/random_work'
+    encoded_image_list = []
     for img_index, img_name in enumerate(image_list):
-        watermarking.E_BLIND(img_name, 0, output_path=test_cache_path)
-        watermarking.E_BLIND(img_name, 1, output_path=test_cache_path)
-        watermarking.E_BLIND(img_name, -1, output_path=test_cache_path)
+        encoded_image_list.append(watermarking.E_BLIND(img_name, 0, input_path=test_data_path, output_path=test_cache_path))
+        encoded_image_list.append(watermarking.E_BLIND(img_name, 1, input_path=test_data_path, output_path=test_cache_path))
+        encoded_image_list.append(watermarking.E_BLIND(img_name, -1, input_path=test_data_path, output_path=test_cache_path))
         print(f"\rEncoding image {img_index + 1}/{image_list_length}", end="", flush=True)
     print("\rEncoding complete", flush=True)
 
     # Decode
-    encoded_image_list = os.listdir(test_cache_path)
     assert len(encoded_image_list) == image_list_length * 3
     image_1_list = []
     image_0_list = []
@@ -35,7 +36,7 @@ if __name__ == '__main__':
         else:
             image_nowatermark_list.append(watermarking.D_LC(img_name, mode='zlc', input_path=test_cache_path))
 
-    x = np.linspace(-1, 1, 51)
+    x = np.linspace(-2, 2, 51)
     y1 = pd.cut(image_1_list, x, labels=x[:-1])
     y0 = pd.cut(image_0_list, x, labels=x[:-1])
     yn = pd.cut(image_nowatermark_list, x, labels=x[:-1])
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     plt.show()
 
     # Calculate rates
-    threshold = 0.22
+    threshold = 0.7
     false_positive_count = 0
     false_negative_count = 0
 

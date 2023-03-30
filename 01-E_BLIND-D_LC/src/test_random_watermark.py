@@ -6,9 +6,9 @@ import watermarking
 import pandas as pd
 import matplotlib.pyplot as plt
 
-single_image = 'more_data_1.jpg'
+# single_image = 'boat.bmp'
 # single_image = 'rec_enlarged.bmp'
-# single_image = 'brain1.BMP'
+single_image = 'brain1.BMP'
 
 
 if __name__ == '__main__':
@@ -42,7 +42,7 @@ if __name__ == '__main__':
         else:
             image_no_list.append(watermarking.D_LC(img_name, mode='zlc', watermark=watermark_list[watermark_index], input_path=test_cache_path))
 
-    x = np.linspace(-1, 1, 51)
+    x = np.linspace(-2, 2, 51)
     y1 = pd.cut(image_1_list, x, labels=x[:-1])
     y0 = pd.cut(image_0_list, x, labels=x[:-1])
     yn = pd.cut(image_no_list, x, labels=x[:-1])
@@ -62,7 +62,7 @@ if __name__ == '__main__':
     plt.show()
 
     # Calculate rates
-    threshold = 0.22
+    threshold = 0.7
     false_positive_count = 0
     false_negative_count = 0
 
