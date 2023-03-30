@@ -5,9 +5,9 @@ import numpy as np
 cache_path = '../cache/0'
 data_path = '../data'
 default_seed = 20230324
-default_threshold = 0.22
+default_threshold = 0.7
 default_beta = max(1 - default_threshold, 0.3)
-image_shape = (512, 512)
+default_image_shape = (512, 512)
 NO_WATERMARK = -1
 
 
@@ -18,7 +18,7 @@ if not os.path.exists(cache_path):
     os.makedirs(cache_path)
 
 
-def generate_normalized_watermark(seed=None, image_shape=image_shape):
+def generate_normalized_watermark(seed=None, image_shape=default_image_shape):
     """
     :return: A watermark of zero mean and unit variance.
     """
@@ -29,7 +29,6 @@ def generate_normalized_watermark(seed=None, image_shape=image_shape):
 
 
 default_watermark = generate_normalized_watermark(default_seed)
-default_image_shape = image_shape
 
 
 def E_FIXED_LC_getalpha(image, watermark, threshold, beta):
@@ -68,7 +67,9 @@ than the threshold
     # Output
     if not os.path.exists(output_path):
         os.makedirs(output_path)
-    cv2.imwrite(os.path.join(output_path, f'{message}_{notes}{file_name}'), encoded_img)
+    output_image_name = f'{message}_{notes}{file_name}'
+    cv2.imwrite(os.path.join(output_path, output_image_name), encoded_img)
+    return output_image_name
 
 
 def D_LC(file_name, watermark=default_watermark, image_shape=default_image_shape, mode='accept',
