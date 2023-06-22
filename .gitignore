@@ -3,4 +3,5 @@
 **/cache
 **/data
 **/datasets
+**/hidden
 __pycache__
